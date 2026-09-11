@@ -1,122 +1,156 @@
-import { useState } from 'react'
-import heroImg from './assets/avto.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import PartsAPI from './service'; 
 
 function App() {
-  const [count, setCount] = useState(0)
+ 
+  const [parts, setParts] = useState([]);
+
+
+  const [formData, setFormData] = useState({
+    name: '',
+    article: '',
+    price: '',
+    quantity: '',
+  });
+
+
+  useEffect(() => {
+    setParts([...PartsAPI.all()]);
+  }, []);
+
+ 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+
+    if (!formData.name || !formData.article || !formData.price || !formData.quantity) {
+      alert('Пожалуйста, заполните все поля');
+      return;
+    }
+
+
+    const newPart = {
+      name: formData.name,
+      article: formData.article,
+      price: Number(formData.price),
+      quantity: Number(formData.quantity),
+    };
+
+
+    PartsAPI.add(newPart);
+    
+
+    setParts([...PartsAPI.all()]);
+    
+  
+    setFormData({ name: '', article: '', price: '', quantity: '' });
+  };
+
+
+  const handleDelete = (id) => {
+  
+    PartsAPI.delete(id);
+    
+  
+    setParts([...PartsAPI.all()]);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div>
+      <h1>Магазин автозапчастей</h1>
+
+      {/* Форма добавления новой запчасти */}
+      <h2>Добавить запчасть</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Название: </label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder="Например: Свеча зажигания"
+          />
         </div>
         <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
+          <label>Артикул: </label>
+          <input
+            type="text"
+            name="article"
+            value={formData.article}
+            onChange={handleInputChange}
+            placeholder="Например: SP-123"
+          />
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div>
+          <label>Цена (руб): </label>
+          <input
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={handleInputChange}
+            placeholder="Например: 1500"
+          />
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+        <div>
+          <label>Количество: </label>
+          <input
+            type="number"
+            name="quantity"
+            value={formData.quantity}
+            onChange={handleInputChange}
+            placeholder="Например: 5"
+          />
         </div>
-      </section>
+        <button type="submit">Добавить запчасть</button>
+      </form>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <hr />
+
+      {/* Таблица со списком запчастей */}
+      <h2>Список запчастей на складе</h2>
+      <table border="1" cellPadding="10" cellSpacing="0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Артикул</th>
+            <th>Цена (руб)</th>
+            <th>Количество</th>
+            <th>Действие</th>
+          </tr>
+        </thead>
+        <tbody>
+          {parts.length === 0 ? (
+            <tr>
+              <td colSpan="6">Список пуст</td>
+            </tr>
+          ) : (
+            parts.map((part) => (
+              <tr key={part.id}>
+                <td>{part.id}</td>
+                <td>{part.name}</td>
+                <td>{part.article}</td>
+                <td>{part.price}</td>
+                <td>{part.quantity}</td>
+                <td>
+                  <button onClick={() => handleDelete(part.id)}>
+                    Удалить
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
-export default App
+export default App;
