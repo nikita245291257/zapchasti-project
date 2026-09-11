@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import PartsAPI from './service';
-import background from './assets/avto.jpg'; 
+import PartsAPI from './service'; 
 
 function App() {
+ 
   const [parts, setParts] = useState([]);
+
 
   const [formData, setFormData] = useState({
     name: '',
@@ -12,22 +13,27 @@ function App() {
     quantity: '',
   });
 
+
   useEffect(() => {
     setParts([...PartsAPI.all()]);
   }, []);
 
+ 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
 
     if (!formData.name || !formData.article || !formData.price || !formData.quantity) {
       alert('Пожалуйста, заполните все поля');
       return;
     }
+
 
     const newPart = {
       name: formData.name,
@@ -36,28 +42,27 @@ function App() {
       quantity: Number(formData.quantity),
     };
 
+
     PartsAPI.add(newPart);
+    
+
     setParts([...PartsAPI.all()]);
+    
+  
     setFormData({ name: '', article: '', price: '', quantity: '' });
   };
 
+
   const handleDelete = (id) => {
+  
     PartsAPI.delete(id);
+    
+  
     setParts([...PartsAPI.all()]);
   };
 
   return (
-    // ↓ 2. Обернули всё в div с фоновым стилем
-    <div
-      style={{
-        backgroundImage: `url(${background})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-        minHeight: '100vh',
-        padding: '30px',
-      }}
-    >
+    <div>
       <h1>Магазин автозапчастей</h1>
 
       {/* Форма добавления новой запчасти */}
